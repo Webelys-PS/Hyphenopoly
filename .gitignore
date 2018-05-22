@@ -1,0 +1,6 @@
+vendor/
+bin/
+.php_cs.cache
+config_*.xml
+config.xml
+*.zip
