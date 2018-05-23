@@ -63,7 +63,8 @@ class Hyphenopoly extends Module
     {
         return parent::install() &&
             $this->registerHook('displayMobileHeader') &&
-            $this->registerHook('displayHeader');
+            $this->registerHook('displayHeader') &&
+            $this->postProcess();
     }
 
     public function uninstall()
@@ -144,6 +145,8 @@ class Hyphenopoly extends Module
         );
         $Hyphenopoly_config_content = $this->context->smarty->fetch($this->local_path.'/tpl/Hyphenopoly.init.js.tpl');
         file_put_contents(dirname(__FILE__).'/views/js/'.$this->js_config_file, $Hyphenopoly_config_content);
+
+        return true;
     }
 
 

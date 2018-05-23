@@ -1,5 +1,6 @@
 vendor/
 bin/
+views/js/Hyphenopoly.config.js
 .php_cs.cache
 config_*.xml
 config.xml
