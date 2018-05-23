@@ -40,6 +40,8 @@ class Hyphenopoly extends Module
         $this->author = 'Webelys';
         $this->need_instance = 0;
 
+        $this->js_config_file = 'Hyphenopoly.config.js';
+
         /**
          * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
          */
@@ -69,6 +71,82 @@ class Hyphenopoly extends Module
         return parent::uninstall();
     }
 
+    /**
+     * Load the configuration form
+     */
+    public function getContent()
+    {
+        /**
+         * If values have been submitted in the form, process.
+         */
+        if (((bool)Tools::isSubmit('submitHyphenopolyModule')) == true) {
+            $this->postProcess();
+        }
+
+        return $this->renderForm();
+    }
+
+    /**
+     * Create the form that will be displayed in the configuration of your module.
+     */
+    protected function renderForm()
+    {
+        $helper = new HelperForm();
+
+        $helper->show_toolbar = false;
+        $helper->table = $this->table;
+        $helper->module = $this;
+        $helper->default_form_language = $this->context->language->id;
+        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
+
+        $helper->identifier = $this->identifier;
+        $helper->submit_action = 'submitHyphenopolyModule';
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
+            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+
+        $helper->tpl_vars = array(
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id,
+        );
+
+        return $helper->generateForm(array($this->getConfigForm()));
+    }
+
+    /**
+     * Create the structure of your form.
+     */
+    protected function getConfigForm()
+    {
+        return array(
+            'form' => array(
+                'legend' => array(
+                'title' => $this->l('Settings'),
+                'icon' => 'icon-cogs',
+                ),
+                'submit' => array(
+                    'title' => $this->l('Save'),
+                ),
+            ),
+        );
+    }
+
+
+    /**
+     * Save form data.
+     */
+    protected function postProcess()
+    {
+        $this->context->smarty->assign(
+            array(
+                'HyphenopolyBaseJs' => $this->_path.'views/js/'
+            )
+        );
+        $Hyphenopoly_config_content = $this->context->smarty->fetch($this->local_path.'/tpl/Hyphenopoly.init.js.tpl');
+        file_put_contents(dirname(__FILE__).'/views/js/'.$this->js_config_file, $Hyphenopoly_config_content);
+    }
+
+
 
     /**
      * Add the CSS & JavaScript files you want to be added on the FO.
@@ -80,7 +158,8 @@ class Hyphenopoly extends Module
 
     public function hookDisplayHeader($params)
     {
-        $this->context->controller->addJS($this->_path.'/views/js/front.js');
+        $this->context->controller->addJS($this->_path.'/views/js/'.$this->js_config_file);
+        $this->context->controller->addJS($this->_path.'/views/js/Hyphenopoly_Loader.js');
         $this->context->controller->addCSS($this->_path.'/views/css/front.css');
     }
 }
